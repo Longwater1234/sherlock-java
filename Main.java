@@ -10,15 +10,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
-* Java version of sherlock project
+* Minified Java version of sherlock project
 * https://github.com/sherlock-project/sherlock
 * Search username (args) across major social networks.
 */
 public class Main {
   static final int NUMTHREADS = Runtime.getRuntime().availableProcessors();
   public static final ExecutorService executor = Executors.newFixedThreadPool(NUMTHREADS);
-  static Type websiteType = new TypeToken<List<Website>>() {
-  }.getType();
+  static Type websiteType = new TypeToken<List<Website>>() {}.getType();
   static Gson gson = new Gson();
 
   public static void main(String[] args) throws Exception {
