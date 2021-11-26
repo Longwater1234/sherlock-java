@@ -10,10 +10,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
-* Minified Java version of sherlock project
-* https://github.com/sherlock-project/sherlock
-* Search username (args) across major social networks.
-*/
+ * Minified Java version of sherlock project
+ * https://github.com/sherlock-project/sherlock Search username (args) across
+ * major social networks.
+ */
 public class Main {
   static final int NUMTHREADS = Runtime.getRuntime().availableProcessors();
   public static final ExecutorService executor = Executors.newFixedThreadPool(NUMTHREADS);
@@ -21,6 +21,9 @@ public class Main {
   static Gson gson = new Gson();
 
   public static void main(String[] args) throws Exception {
+    // if (args.length == 0) throw new Exception("Username is null. Bye");
+    // final String username = args[0];
+
     final String username = "jack";
 
     List<Website> websites = gson.fromJson(new BufferedReader(new FileReader("./websites.json")), websiteType);
