@@ -32,7 +32,6 @@ public class App {
 
         websites.forEach(w -> executor.execute(new SearchProcessor(w.getUrl(), username, w.getService())));
 
-
         executor.shutdown();
     }
 

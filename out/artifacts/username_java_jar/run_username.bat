@@ -1,1 +1,0 @@
-java -jar username-java.jar john && echo 1
