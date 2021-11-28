@@ -1,0 +1,6 @@
+iterate through the file, for each "url" -> replace {} with `username`,
+then do the search(), start a new thread,
+iterate through all with .get 
+and print() to console 
+ONLY if response.status === 200
+MEANS `username` exists on `url`	
