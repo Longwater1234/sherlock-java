@@ -18,16 +18,15 @@ import java.util.concurrent.Executors;
  * FOR JAVA 11+
  */
 public class App {
-    public static final int NUMTHREADS = Runtime.getRuntime().availableProcessors();
-    public static final ExecutorService executor = Executors.newFixedThreadPool(NUMTHREADS);
+    static final int NUMTHREADS = Runtime.getRuntime().availableProcessors();
+    static final ExecutorService executor = Executors.newFixedThreadPool(NUMTHREADS);
     static Type websiteType = new TypeToken<List<Website>>() {}.getType();
     static Gson gson = new Gson();
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0) throw new Exception("Username is null. Bye");
         final String username = args[0];
-         if (!username.matches("^[a-zA-Z0-9\\S_]$")) throw new Exception("Username is invalid");
-
+        if (!username.matches("^[a-zA-Z0-9_-]{2,}$")) throw new Exception("Username is invalid");
 
         List<Website> websites = gson.fromJson(new BufferedReader(new FileReader("websites.json")), websiteType);
 
