@@ -26,7 +26,7 @@ public class App {
     public static void main(String[] args) throws Exception {
         if (args.length == 0) throw new Exception("Username is null. Bye");
         final String username = args[0];
-        if(!username.matches("[a-zA-Z_0-9\\S\\-]+")) throw new Exception("Username is invalid");
+         if (!username.matches("^[a-zA-Z0-9\\S_]$")) throw new Exception("Username is invalid");
 
 
         List<Website> websites = gson.fromJson(new BufferedReader(new FileReader("websites.json")), websiteType);
