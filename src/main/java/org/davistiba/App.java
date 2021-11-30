@@ -18,7 +18,8 @@ import java.util.concurrent.Executors;
  * FOR JAVA 11+
  */
 public class App {
-    public static final ExecutorService executor = Executors.newFixedThreadPool(4);
+    public static final int NUMTHREADS = Runtime.getRuntime().availableProcessors();
+    public static final ExecutorService executor = Executors.newFixedThreadPool(NUMTHREADS);
     static Type websiteType = new TypeToken<List<Website>>() {}.getType();
     static Gson gson = new Gson();
 
