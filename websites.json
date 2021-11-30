@@ -82,5 +82,25 @@
   {
     "service": "Weibo",
     "url": "https://www.weibo.com/%"
+  },
+  {
+    "service": "Blogger",
+    "url": "https://%.blogspot.com"
+  },
+  {
+    "service": "Freelancer",
+    "url": "https://www.freelancer.com/u/%"
+  },
+  {
+    "service": "Myspace",
+    "url": "https://myspace.com/%"
+  },
+  {
+    "service": "OnlyFans",
+    "url": "https://onlyfans.com/%"
+  },
+  {
+    "service": "Steam",
+    "url": "https://steamcommunity.com/id/%"
   }
 ]
