@@ -6,8 +6,6 @@ import com.google.gson.reflect.TypeToken;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.lang.reflect.Type;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,8 +16,8 @@ import java.util.concurrent.Executors;
  * FOR JAVA 11+
  */
 public class App {
-    static final int NUMTHREADS = Runtime.getRuntime().availableProcessors();
-    static final ExecutorService executor = Executors.newFixedThreadPool(NUMTHREADS);
+    private static final int NUMTHREADS = Runtime.getRuntime().availableProcessors();
+    private static final ExecutorService executor = Executors.newFixedThreadPool(NUMTHREADS);
     static Type websiteType = new TypeToken<List<Website>>() {}.getType();
     static Gson gson = new Gson();
 
