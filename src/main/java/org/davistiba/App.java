@@ -1,14 +1,23 @@
 package org.davistiba;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.lang.reflect.Type;
-import java.util.List;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.jetbrains.annotations.NotNull;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Minified version of sherlock-project
@@ -28,10 +37,53 @@ public class App {
 
         List<Website> websites = gson.fromJson(new BufferedReader(new FileReader("websites.json")), websiteType);
 
-        websites.forEach(w -> executor.execute(new SearchProcessor(w.getUrl(), username, w.getService())));
+        websites.forEach(w -> search(username, w.getUrl())
+                .thenApplyAsync(HttpResponse::statusCode, executor)
+                .exceptionally(Object::hashCode)
+                .thenAccept(result -> handleResult(result, w.getUrl())));
 
-        executor.shutdown();
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+               executor.shutdown();
+            }
+        }, 70000L);
+        
     }
 
+	/**
+	 * Our actual Search method
+	 *
+	 * @param username Username
+	 * @param uri      target address
+	 * @return response "Promise"
+	 */
+	public static CompletableFuture<HttpResponse<String>> search(String username, @NotNull String uri) {
+		String finalUri = uri.replace("%", username);
+		HttpRequest request = HttpRequest.newBuilder()
+				.uri(URI.create(finalUri))
+				.timeout(Duration.ofSeconds(20))
+				.GET()
+				.build();
+
+		return HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString());
+
+	}
+
+
+	public static void handleResult(int result, String url) {
+		switch (result) {
+		case 200:
+			System.out.printf("\u001B[32m✓ EXISTS at %s\u001B[0m \n", url);
+			break;
+		case 404:
+			System.out.printf("\u001B[31mx NOT FOUND at %s\u001B[0m \n", url);
+			break;
+		default:
+			System.out.printf("FAILED at %s \n", url);
+			break;
+		}
+
+	}
 
 }

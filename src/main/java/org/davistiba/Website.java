@@ -1,22 +1,29 @@
 package org.davistiba;
 
-public class Website {
-    private String service;
-    private String url;
+import java.util.Objects;
 
-    public String getService() {
-        return service;
-    }
+/**
+ * For JSON conversion
+ */
+public class Website {
+    private String url;
 
     public String getUrl() {
         return url;
     }
 
     @Override
-    public String toString() {
-        return "Website{" +
-                "service='" + service + '\'' +
-                ", url='" + url + '\'' +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Website website = (Website) o;
+
+        return Objects.equals(url, website.url);
+    }
+
+    @Override
+    public int hashCode() {
+        return url != null ? url.hashCode() : 0;
     }
 }
