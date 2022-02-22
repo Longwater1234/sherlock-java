@@ -28,8 +28,7 @@ import java.util.stream.Collectors;
 public class App {
     private static final int NUMTHREADS = Runtime.getRuntime().availableProcessors();
     private static final ExecutorService executor = Executors.newFixedThreadPool(NUMTHREADS);
-    static final Type websiteType = new TypeToken<List<Website>>() {
-    }.getType();
+    static final Type websiteType = new TypeToken<List<Website>>() {}.getType();
     static final Gson gson = new Gson();
 
     public static void main(String[] args) throws Exception {
@@ -49,7 +48,7 @@ public class App {
                         .thenAccept(result -> handleResult(result, w.getUrl())))
                 .collect(Collectors.toList());
 
-//        /* SLOWER, BUT ACCURATE: */
+//        /* 15x SLOWER, BUT ACCURATE: */
 //        List<CompletableFuture<Void>> cfList2 = websites.parallelStream()
 //                .map(w -> CompletableFuture.runAsync(new SearchProcessor(username, w.getUrl()), executor))
 //                .collect(Collectors.toList());
