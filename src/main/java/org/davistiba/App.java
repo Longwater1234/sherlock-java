@@ -21,14 +21,15 @@ import java.util.stream.Collectors;
 
 /**
  * Minified version of sherlock-project
- * Searches given Username on 1000 Social Networks.
+ * Search given Username in 1000 Social Networks.
  * FOR JAVA 11+
  * @author Davis Tibbz
  */
 public class App {
     private static final int NUMTHREADS = Runtime.getRuntime().availableProcessors();
     private static final ExecutorService executor = Executors.newFixedThreadPool(NUMTHREADS);
-    static final Type websiteType = new TypeToken<List<Website>>() {}.getType();
+    static final Type websiteType = new TypeToken<List<Website>>() {
+    }.getType();
     static final Gson gson = new Gson();
 
     public static void main(String[] args) throws Exception {
@@ -36,9 +37,7 @@ public class App {
         final String username = args[0];
         if (!username.matches("^[a-zA-Z0-9_-]{2,}$")) throw new Exception("Username is invalid");
 
-
         List<Website> websites = gson.fromJson(new BufferedReader(new FileReader("websites.json")), websiteType);
-
 
         long start = System.currentTimeMillis();
         System.out.printf("Has began %s \n", Instant.now());
@@ -49,6 +48,12 @@ public class App {
                         .exceptionally(Object::hashCode)
                         .thenAccept(result -> handleResult(result, w.getUrl())))
                 .collect(Collectors.toList());
+
+//        /* SLOWER, BUT ACCURATE: */
+//        List<CompletableFuture<Void>> cfList2 = websites.parallelStream()
+//                .map(w -> CompletableFuture.runAsync(new SearchProcessor(username, w.getUrl()), executor))
+//                .collect(Collectors.toList());
+
 
         CompletableFuture<?>[] mama = cfList.toArray(CompletableFuture[]::new);
         CompletableFuture.allOf(mama).join();
