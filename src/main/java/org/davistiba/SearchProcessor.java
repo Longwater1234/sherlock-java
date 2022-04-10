@@ -8,7 +8,11 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
+/**
+ * Actually performs the lookup
+ *
+ * @author Davis
+ */
 public class SearchProcessor implements Runnable {
     // final String finalUri =
     private final String finalUri;
@@ -25,9 +29,9 @@ public class SearchProcessor implements Runnable {
     }
 
     // colors
-    public final String ANSI_RED = "\u001B[31m";
-    public final String ANSI_RESET = "\u001B[0m";
-    public final String ANSI_GREEN = "\u001B[32m";
+    private static final String ANSI_RED = "\u001B[31m";
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_GREEN = "\u001B[32m";
 
     public SearchProcessor(String username, String uri) {
         this.finalUri = uri.replaceAll("%", username);
@@ -37,7 +41,8 @@ public class SearchProcessor implements Runnable {
 
     @Override
     public void run() {
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(finalUri))
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(finalUri))
                 .timeout(Duration.ofSeconds(3)).GET().build();
 
         try {
@@ -46,7 +51,7 @@ public class SearchProcessor implements Runnable {
             final int statusCode = response.statusCode();
             String exists = (statusCode == 200) ? (ANSI_GREEN + "\u2713") : (ANSI_RED + "x");
             if (statusCode == 200) FOUND.incrementAndGet();
-            else if(statusCode == 404) NOTFOUND.incrementAndGet();
+            else if (statusCode == 404) NOTFOUND.incrementAndGet();
             System.out.printf("%s \t %s on %s? %n%s", exists, username, finalUri, ANSI_RESET);
 
         } catch (IOException | InterruptedException e) {
