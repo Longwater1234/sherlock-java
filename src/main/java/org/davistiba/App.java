@@ -45,23 +45,24 @@ public class App {
         System.out.printf("Has began %s \n", Instant.now());
         System.out.printf("Searching for %s ... \n", username);
 
-//        List<CompletableFuture<Void>> cfList = websites.parallelStream()
-//                .map(w -> doSearch(username, w.getUrl())
-//                        .thenApplyAsync(HttpResponse::statusCode, executor)
-//                        .exceptionally(Object::hashCode)
-//                        .thenAcceptAsync(result -> handleResult(result, w.getUrl())))
-//                .collect(Collectors.toList());
-
-        /* 15x SLOWER, BUT ACCURATE: */
-        List<CompletableFuture<Void>> cfList2 = websites.parallelStream()
-                .map(w -> CompletableFuture.runAsync(new SearchProcessor(username, w.getUrl()), executor))
+        List<CompletableFuture<Void>> cfList = websites.stream()
+                .map(w -> doSearch(username, w.getUrl())
+                        .thenApplyAsync(HttpResponse::statusCode, executor)
+                        .exceptionally(Object::hashCode)
+                        .thenAcceptAsync(result -> handleResult(result, w.getUrl())))
                 .collect(Collectors.toList());
 
-        CompletableFuture<?>[] mama = cfList2.toArray(CompletableFuture[]::new);
+//        /* 15x SLOWER, BUT ACCURATE: */
+//        List<CompletableFuture<Void>> cfList2 = websites.parallelStream()
+//                .map(w -> CompletableFuture.runAsync(new SearchProcessor(username, w.getUrl()), executor))
+//                .collect(Collectors.toList());
+
+        CompletableFuture<?>[] mama = cfList.toArray(CompletableFuture[]::new);
         CompletableFuture.allOf(mama).join();
         System.out.println("Time elapsed (ms): " + (System.currentTimeMillis() - start));
-        System.out.println("TOTAL FOUND: " + FOUND);
-        System.out.println("TOTAL NOTFOUND: " + NOTFOUND);
+        System.out.printf("Results for %s\n---------------\n", username);
+        System.out.printf("TOTAL FOUND: %d\n", FOUND);
+        System.out.printf("TOTAL NOTFOUND: %d\n", NOTFOUND);
         executor.shutdown();
     }
 
