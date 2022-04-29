@@ -60,7 +60,7 @@ public class App {
         CompletableFuture<?>[] mama = cfList.toArray(CompletableFuture[]::new);
         CompletableFuture.allOf(mama).join();
         System.out.println("Time elapsed (ms): " + (System.currentTimeMillis() - start));
-        System.out.printf("Results for %s\n---------------\n", username);
+        System.out.printf("Results for '%s'\n---------------\n", username);
         System.out.printf("TOTAL FOUND: %d\n", FOUND);
         System.out.printf("TOTAL NOTFOUND: %d\n", NOTFOUND);
         executor.shutdown();
