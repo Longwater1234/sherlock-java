@@ -2,7 +2,6 @@ package org.davistiba;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -12,11 +11,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -28,28 +28,30 @@ import java.util.stream.Collectors;
  */
 public class App {
     private static final int NUMTHREADS = Runtime.getRuntime().availableProcessors();
-    private static final ExecutorService executor = Executors.newFixedThreadPool(NUMTHREADS);
+    private static final ExecutorService executor = Executors.newWorkStealingPool();
     static final Type websiteType = new TypeToken<List<Website>>() {}.getType();
     static final Gson gson = new Gson();
-    static int FOUND = 0;
-    static int NOTFOUND = 0;
+    static final AtomicInteger FOUND = new AtomicInteger(0);
+    static final AtomicInteger NOTFOUND = new AtomicInteger(0);
+    private static final String USERAGENT = "curl/7.64.1";
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0) throw new Exception("Username is null. Bye");
         final String username = args[0];
-        if (!username.matches("^[a-zA-Z0-9_-]{2,}$")) throw new Exception("Username is invalid");
+              if (!username.matches("^[a-zA-Z0-9_-]{2,}$")) throw new Exception("Username is invalid");
 
         List<Website> websites = gson.fromJson(new BufferedReader(new FileReader("websites.json")), websiteType);
 
-        long start = System.currentTimeMillis();
-        System.out.printf("Has began %s \n", Instant.now());
-        System.out.printf("Searching for %s ... \n", username);
+        long start = System.nanoTime();
+        System.out.printf("Has began at %s \n", LocalDateTime.now());
+        System.out.printf("Searching for %s... \n", username);
+
 
         List<CompletableFuture<Void>> cfList = websites.stream()
                 .map(w -> doSearch(username, w.getUrl())
-                        .thenApplyAsync(HttpResponse::statusCode, executor)
+                        .thenApply(HttpResponse::statusCode)
                         .exceptionally(Object::hashCode)
-                        .thenAcceptAsync(result -> handleResult(result, w.getUrl())))
+                        .thenAcceptAsync(result -> handleResult(result, w.getUrl()), executor))
                 .collect(Collectors.toList());
 
 //        /* 15x SLOWER, BUT ACCURATE: */
@@ -57,12 +59,14 @@ public class App {
 //                .map(w -> CompletableFuture.runAsync(new SearchProcessor(username, w.getUrl()), executor))
 //                .collect(Collectors.toList());
 
+
         CompletableFuture<?>[] mama = cfList.toArray(CompletableFuture[]::new);
         CompletableFuture.allOf(mama).join();
-        System.out.println("Time elapsed (ms): " + (System.currentTimeMillis() - start));
-        System.out.printf("Results for '%s'\n---------------\n", username);
-        System.out.printf("TOTAL FOUND: %d\n", FOUND);
-        System.out.printf("TOTAL NOTFOUND: %d\n", NOTFOUND);
+
+
+        System.out.println("Time elapsed (ms): " + (System.nanoTime() - start) / 1e6);
+        System.out.println("TOTAL FOUND: " + FOUND.get());
+        System.out.println("TOTAL NOTFOUND: " + NOTFOUND.get());
         executor.shutdown();
     }
 
@@ -78,7 +82,8 @@ public class App {
         String finalUri = uri.replace("%", username);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(finalUri))
-                .timeout(Duration.ofSeconds(3))
+                .header("User-Agent", USERAGENT)
+                .timeout(Duration.ofMillis(3000))
                 .GET()
                 .build();
 
@@ -90,6 +95,8 @@ public class App {
 
     public static void handleResult(int result, String url) {
         switch (result) {
+            case 301:
+            case 302:
             case 200:
                 System.out.printf("\u001B[32m✓ EXISTS at %s\u001B[0m \n", url);
                 FOUND++;
