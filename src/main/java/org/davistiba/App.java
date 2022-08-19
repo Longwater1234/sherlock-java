@@ -99,11 +99,11 @@ public class App {
             case 302:
             case 200:
                 System.out.printf("\u001B[32m✓ EXISTS at %s\u001B[0m \n", url);
-                FOUND++;
+                FOUND.incrementAndGet();
                 break;
             case 404:
                 System.out.printf("\u001B[31mx NOT FOUND at %s\u001B[0m \n", url);
-                NOTFOUND++;
+                NOTFOUND.incrementAndGet();
                 break;
             default:
                 System.out.printf("FAILED at %s \n", url);
