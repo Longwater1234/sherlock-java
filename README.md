@@ -8,7 +8,7 @@ Minified Java version of sherlock project (https://github.com/sherlock-project/s
 ### How to Use
 - Build the jar using Maven or your IDE, and run as shown in below.
 - Username should be passed as an `arg` of Main method, without any prefixes.  (e.g. looking up username "davis").
-- You can also run inside your IDE, just make sure you setup **Run Config** to pass arguments.
+- You can also run inside your IDE, just make sure you setup **Run Config** for you IDE to pass arguments.
 ```
 java -jar sherlock.jar davis
 ```
