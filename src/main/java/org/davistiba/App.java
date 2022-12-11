@@ -1,6 +1,5 @@
 package org.davistiba;
 
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -9,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * Minified version of sherlock-project
@@ -30,7 +29,6 @@ import com.google.gson.reflect.TypeToken;
  */
 public class App {
     private static final ExecutorService executor = Executors.newWorkStealingPool();
-    static final Type websiteType = new TypeToken<List<Website>>() {}.getType();
     static final Gson gson = new Gson();
     static final AtomicInteger FOUND = new AtomicInteger(0);
     static final AtomicInteger NOTFOUND = new AtomicInteger(0);
@@ -39,17 +37,17 @@ public class App {
     public static void main(String[] args) throws Exception {
         if (args.length == 0) throw new Exception("Username is null. Bye");
         final String username = args[0];
-        if (!username.matches("^[a-zA-Z0-9_-]{2,}$")){
-              throw new Exception("Username is invalid");
+        if (!username.matches("^[a-zA-Z0-9_-]{2,}$")) {
+            throw new Exception("Username is invalid");
         }
-          
-        List<Website> websites = gson.fromJson(Files.newBufferedReader(Paths.get("websites.json")), websiteType);
+
+        Website[] websites = gson.fromJson(Files.newBufferedReader(Paths.get("websites.json")), Website[].class);
 
         long start = System.nanoTime();
         System.out.printf("Has began at %s \n", LocalDateTime.now());
         System.out.printf("Searching for %s... \n", username);
 
-        List<CompletableFuture<Void>> cfList = websites.stream()
+        List<CompletableFuture<Void>> cfList = Arrays.stream(websites)
                 .map(w -> doSearch(username, w.getUrl())
                         .thenApply(HttpResponse::statusCode)
                         .exceptionally(Object::hashCode)
