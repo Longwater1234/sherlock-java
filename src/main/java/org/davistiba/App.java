@@ -32,7 +32,7 @@ public class App {
     static final Gson gson = new Gson();
     static final AtomicInteger FOUND = new AtomicInteger(0);
     static final AtomicInteger NOTFOUND = new AtomicInteger(0);
-    private static final String USERAGENT = "curl/7.64.1";
+    private static final String USERAGENT = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.2 (KHTML, like Gecko) Chrome/22.0.1216.0 Safari/537.2";
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0) throw new Exception("Username is null. Bye");
