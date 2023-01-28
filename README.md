@@ -6,11 +6,11 @@ Minified Java version of sherlock project (https://github.com/sherlock-project/s
 - **Credits**: Social website list taken from https://github.com/qeeqbox/social-analyzer)
 
 ### How to Use
-- Build the jar using Maven or your IDE, and run as shown in below.
-- Username (only 1 name) should be passed as an `arg` of Main method.
-- Make sure the file `websites.json` is in the classpath, or same path as the JAR.
-- You can also run inside your IDE, just make sure you setup **Run Configuration** for your IDE to pass arguments.
-- For example, looking for username "davis":
-```
-java -jar sherlock.jar davis
+- Run within your IDE, or build executable JAR with: `mvn clean package`.
+- Remember to pass the username as an `arg` of Main method as shown below.
+- If using an IDE, (eg. Eclipse or IntelliJ) you can pass the arg in: **Run Menu** > **Edit Configuration** > **Arguments**
+- Make sure the file [websites.json](websites.json) is in the classpath, or same path as the JAR.
+```bash
+# For example, looking up username "davis":
+java -jar sherlock-java-1.0.jar davis
 ```
