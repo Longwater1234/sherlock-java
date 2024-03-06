@@ -1,11 +1,14 @@
 package org.davistiba;
 
+import com.google.gson.Gson;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.FileReader;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -13,12 +16,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import org.jetbrains.annotations.NotNull;
-
-import com.google.gson.Gson;
 
 /**
  * Minified version of sherlock-project
@@ -28,20 +29,24 @@ import com.google.gson.Gson;
  * @author Davis Tibbz
  */
 public class App {
-    private static final ExecutorService executor = Executors.newWorkStealingPool();
-    static final Gson gson = new Gson();
     static final AtomicInteger FOUND = new AtomicInteger(0);
     static final AtomicInteger NOTFOUND = new AtomicInteger(0);
+    private static final Gson gson = new Gson();
+    private static final ExecutorService executor = Executors.newWorkStealingPool();
     private static final String USERAGENT = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.2 (KHTML, like Gecko) Chrome/22.0.1216.0 Safari/537.2";
+    private static final Pattern USERNAME_REGEX = Pattern.compile("^[a-zA-Z0-9_-]{2,}$");
 
     public static void main(String[] args) throws Exception {
-        if (args.length == 0) throw new Exception("Username is null. Bye");
+        if (args.length == 0) throw new Exception("Username arg is null. Bye!");
         final String username = args[0];
-        if (!username.matches("^[a-zA-Z0-9_-]{2,}$")) {
+        if (!USERNAME_REGEX.matcher(username).matches()) {
             throw new Exception("Username is invalid");
         }
 
-        Website[] websites = gson.fromJson(Files.newBufferedReader(Paths.get("websites.json")), Website[].class);
+        //Load json file from 'resources' dir
+        URL websiteFile = App.class.getClassLoader().getResource("websites.json");
+        assert websiteFile != null;
+        Website[] websites = gson.fromJson(new FileReader(websiteFile.getFile()), Website[].class);
 
         long start = System.nanoTime();
         System.out.printf("Has began at %s \n", LocalDateTime.now());
@@ -61,6 +66,7 @@ public class App {
         System.out.println("TOTAL FOUND: " + FOUND.get());
         System.out.println("TOTAL NOTFOUND: " + NOTFOUND.get());
         executor.shutdown();
+        executor.awaitTermination(120, TimeUnit.SECONDS);
     }
 
     /**
