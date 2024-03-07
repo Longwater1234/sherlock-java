@@ -13,13 +13,13 @@ Minified Java version of sherlock project (https://github.com/sherlock-project/s
 
 ### How to Use
 
-- Using Maven, build executable JAR with: `./mvnw clean package`.
+- Using your Terminal (or Powershell), build executable JAR with: `./mvnw clean package`.
 - Remember to pass the username as an `arg` of Main method as shown below.
 - If running inside an IDE, (eg. Eclipse or IntelliJ) you can set the username arg in: **Run Menu** > **Edit Configuration** > 
   **Arguments**
-- Make sure the file [websites.json](src/main/resources/websites.json) is in the classpath, or same path as the JAR.
+- Make sure the file [websites.json](src/main/resources/websites.json) is in the classpath.
 
 ```bash
 # For example, looking up username "davis":
-java -jar sherlock-java.jar davis
+java -jar target/sherlock-java.jar davis
 ```

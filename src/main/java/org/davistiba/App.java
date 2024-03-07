@@ -3,7 +3,9 @@ package org.davistiba;
 import com.google.gson.Gson;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
@@ -39,6 +41,7 @@ public class App {
     public static void main(String[] args) throws Exception {
         if (args.length == 0) throw new Exception("Username arg is null. Bye!");
         final String username = args[0];
+
         if (!USERNAME_REGEX.matcher(username).matches()) {
             throw new Exception("Username is invalid");
         }
@@ -46,9 +49,10 @@ public class App {
         //Load json file from 'resources' dir
         URL websiteFile = App.class.getClassLoader().getResource("websites.json");
         assert websiteFile != null;
-        Website[] websites = gson.fromJson(new FileReader(websiteFile.getFile()), Website[].class);
+        Website[] websites = gson.fromJson(new BufferedReader(new InputStreamReader(websiteFile.openStream())), Website[].class);
 
         long start = System.nanoTime();
+        System.out.printf("Loaded %d websites\n", websites.length);
         System.out.printf("Has began at %s \n", LocalDateTime.now());
         System.out.printf("Searching for %s... \n", username);
 
@@ -87,26 +91,25 @@ public class App {
 
         return HttpClient.newHttpClient()
                 .sendAsync(request, HttpResponse.BodyHandlers.ofString());
-
     }
 
+    /**
+     * Print result of given URL lookup, then update count atomically
+     * @param result Http status code
+     * @param url the target endpoint
+     */
     public static void handleResult(int result, String url) {
         switch (result) {
-            case 301:
-            case 302:
-            case 200:
+            case 301, 302, 200 -> {
                 System.out.printf("\u001B[32m✓ EXISTS at %s\u001B[0m \n", url);
                 FOUND.incrementAndGet();
-                break;
-            case 404:
+            }
+            case 404 -> {
                 System.out.printf("\u001B[31mx NOT FOUND at %s\u001B[0m \n", url);
                 NOTFOUND.incrementAndGet();
-                break;
-            default:
-                System.out.printf("FAILED at %s \n", url);
-                break;
+            }
+            default -> System.out.printf("FAILED at %s \n", url);
         }
-
     }
 
 }
