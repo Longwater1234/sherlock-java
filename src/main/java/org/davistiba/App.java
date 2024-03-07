@@ -39,11 +39,11 @@ public class App {
     private static final Pattern USERNAME_REGEX = Pattern.compile("^[a-zA-Z0-9_-]{2,}$");
 
     public static void main(String[] args) throws Exception {
-        if (args.length == 0) throw new Exception("Username arg is null. Bye!");
+        if (args.length == 0) throw new IllegalArgumentException("Username arg is missing. Bye!");
         final String username = args[0];
 
         if (!USERNAME_REGEX.matcher(username).matches()) {
-            throw new Exception("Username is invalid");
+            throw new IllegalArgumentException("Username is invalid");
         }
 
         //Load json file from 'resources' dir
