@@ -7,7 +7,7 @@
 
     <groupId>org.davistiba</groupId>
     <artifactId>sherlock-java</artifactId>
-    <version>1.0</version>
+    <version>1.0.0</version>
 
     <name>sherlock-java</name>
     <url>https://github.com/longwater1234/sherlock-java</url>
@@ -46,7 +46,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>

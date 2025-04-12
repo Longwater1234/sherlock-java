@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
@@ -37,6 +38,7 @@ public class App {
     private static final ExecutorService executor = Executors.newWorkStealingPool();
     private static final String USERAGENT = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.2 (KHTML, like Gecko) Chrome/22.0.1216.0 Safari/537.2";
     private static final Pattern USERNAME_REGEX = Pattern.compile("^[a-zA-Z0-9_-]{2,}$");
+    private static final PrintWriter pw = new PrintWriter(System.out);
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0) throw new IllegalArgumentException("Username arg is missing. Bye!");
@@ -61,16 +63,17 @@ public class App {
                         .thenApply(HttpResponse::statusCode)
                         .exceptionally(Object::hashCode)
                         .thenAcceptAsync(result -> handleResult(result, w.getUrl()), executor))
-                .collect(Collectors.toList());
+                .toList();
 
         CompletableFuture<?>[] mama = cfList.toArray(CompletableFuture[]::new);
         CompletableFuture.allOf(mama).join();
 
-        System.out.printf("Time elapsed (ms): %.3f\n", (System.nanoTime() - start) / 1e6);
+        System.out.printf("Time elapsed (ms): %.3f\n", (System.nanoTime() - start) / 1.00E6);
         System.out.println("TOTAL FOUND: " + FOUND.get());
         System.out.println("TOTAL NOTFOUND: " + NOTFOUND.get());
         executor.shutdown();
-        executor.awaitTermination(120, TimeUnit.SECONDS);
+        pw.close();
+        executor.awaitTermination(60, TimeUnit.SECONDS);
     }
 
     /**
@@ -101,11 +104,11 @@ public class App {
     public static void handleResult(int result, String url) {
         switch (result) {
             case 301, 302, 200 -> {
-                System.out.printf("\u001B[32m✓ EXISTS at %s\u001B[0m \n", url);
+                pw.printf("\u001B[32m✓ EXISTS at %s\u001B[0m \n", url);
                 FOUND.incrementAndGet();
             }
             case 404 -> {
-                System.out.printf("\u001B[31mx NOT FOUND at %s\u001B[0m \n", url);
+                pw.printf("\u001B[31mx NOT FOUND at %s\u001B[0m \n", url);
                 NOTFOUND.incrementAndGet();
             }
             default -> System.out.printf("FAILED at %s \n", url);
