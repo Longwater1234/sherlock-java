@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URI;
@@ -22,7 +21,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Minified version of sherlock-project
@@ -68,9 +66,9 @@ public class App {
         CompletableFuture<?>[] mama = cfList.toArray(CompletableFuture[]::new);
         CompletableFuture.allOf(mama).join();
 
-        System.out.printf("Time elapsed (ms): %.3f\n", (System.nanoTime() - start) / 1.00E6);
-        System.out.println("TOTAL FOUND: " + FOUND.get());
-        System.out.println("TOTAL NOTFOUND: " + NOTFOUND.get());
+        pw.printf("Time elapsed (ms): %.3f\n", (System.nanoTime() - start) / 1.00E6);
+        pw.println("TOTAL FOUND: " + FOUND.get());
+        pw.println("TOTAL NOTFOUND: " + NOTFOUND.get());
         executor.shutdown();
         pw.close();
         executor.awaitTermination(60, TimeUnit.SECONDS);
@@ -98,8 +96,9 @@ public class App {
 
     /**
      * Print result of given URL lookup, then update count atomically
+     *
      * @param result Http status code
-     * @param url the target endpoint
+     * @param url    the target endpoint
      */
     public static void handleResult(int result, String url) {
         switch (result) {
@@ -111,7 +110,7 @@ public class App {
                 pw.printf("\u001B[31mx NOT FOUND at %s\u001B[0m \n", url);
                 NOTFOUND.incrementAndGet();
             }
-            default -> System.out.printf("FAILED at %s \n", url);
+            default -> pw.printf("FAILED at %s \n", url);
         }
     }
 
