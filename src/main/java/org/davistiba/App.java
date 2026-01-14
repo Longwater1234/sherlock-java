@@ -4,9 +4,7 @@ import com.google.gson.Gson;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
@@ -15,14 +13,12 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Minified version of sherlock-project
@@ -38,17 +34,16 @@ public class App {
     private static final ExecutorService executor = Executors.newWorkStealingPool();
     private static final String USERAGENT = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.2 (KHTML, like Gecko) Chrome/22.0.1216.0 Safari/537.2";
     private static final Pattern USERNAME_REGEX = Pattern.compile("^[a-zA-Z0-9_-]{2,}$");
-    private static final PrintWriter pw = new PrintWriter(System.out);
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0) throw new IllegalArgumentException("Username arg is missing. Bye!");
         final String username = args[0];
 
         if (!USERNAME_REGEX.matcher(username).matches()) {
-            throw new IllegalArgumentException("Username is invalid");
+            throw new IllegalArgumentException("Username pattern is invalid");
         }
 
-        //Load json file from 'resources' dir
+        //Load json file from 'resources'
         URL websiteFile = App.class.getClassLoader().getResource("websites.json");
         assert websiteFile != null;
         Website[] websites = gson.fromJson(new BufferedReader(new InputStreamReader(websiteFile.openStream())), Website[].class);
@@ -58,21 +53,18 @@ public class App {
         System.out.printf("Has began at %s \n", LocalDateTime.now());
         System.out.printf("Searching for %s... \n", username);
 
-        List<CompletableFuture<Void>> cfList = Arrays.stream(websites)
+        CompletableFuture<?>[] cfList = Arrays.stream(websites)
                 .map(w -> doSearch(username, w.getUrl())
-                        .thenApply(HttpResponse::statusCode)
-                        .exceptionally(Object::hashCode)
-                        .thenAcceptAsync(result -> handleResult(result, w.getUrl()), executor))
-                .toList();
+                        .handle((resp, ex) -> ex == null ? resp.statusCode() : -1)
+                        .thenAcceptAsync(code -> handleResult(code, w.getUrl()), executor))
+                .toArray(CompletableFuture[]::new);
 
-        CompletableFuture<?>[] mama = cfList.toArray(CompletableFuture[]::new);
-        CompletableFuture.allOf(mama).join();
+        CompletableFuture.allOf(cfList).join();
 
-        pw.printf("Time elapsed (ms): %.3f\n", (System.nanoTime() - start) / 1.00E6);
-        pw.println("TOTAL FOUND: " + FOUND.get());
-        pw.println("TOTAL NOTFOUND: " + NOTFOUND.get());
+        System.out.printf("Time elapsed (ms): %.3f\n", (System.nanoTime() - start) / 1.00E6);
+        System.out.println("TOTAL FOUND: " + FOUND.get());
+        System.out.println("TOTAL NOTFOUND: " + NOTFOUND.get());
         executor.shutdown();
-        pw.close();
         executor.awaitTermination(60, TimeUnit.SECONDS);
     }
 
@@ -83,7 +75,7 @@ public class App {
      * @param uri      target address
      * @return response "Promise"
      */
-    public static CompletableFuture<HttpResponse<String>> doSearch(String username, @NotNull String uri) {
+    public static CompletableFuture<HttpResponse<String>> doSearch(final String username, @NotNull String uri) {
         String finalUri = uri.replace("%", username);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(finalUri))
@@ -98,21 +90,21 @@ public class App {
 
     /**
      * Print result of given URL lookup, then update count atomically
+     *
      * @param result Http status code
-     * @param url the target endpoint
+     * @param url    the target endpoint
      */
     public static void handleResult(int result, String url) {
         switch (result) {
             case 301, 302, 200 -> {
-                pw.printf("\u001B[32m✓ EXISTS at %s\u001B[0m \n", url);
+                System.out.println("\u001B[32m✓ EXISTS at " + url + "\u001B[0m");
                 FOUND.incrementAndGet();
             }
             case 404 -> {
-                pw.printf("\u001B[31mx NOT FOUND at %s\u001B[0m \n", url);
+                System.out.println("\u001B[31mx NOT FOUND at " + url + "\u001B[0m");
                 NOTFOUND.incrementAndGet();
             }
-            default -> System.out.printf("FAILED at %s \n", url);
+            default -> System.out.println("FAILED at " + url);
         }
     }
-
 }
