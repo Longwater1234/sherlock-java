@@ -12,11 +12,11 @@ Minified Java version of sherlock project (https://github.com/sherlock-project/s
 
 ## Requirements
 
-- Java JDK 17 or later
+- Java JDK 21 or later
 
 ### How to Use
 
-- Using your Terminal (or Powershell), build executable JAR with: `./mvnw clean package`.
+- Using your Terminal (or PowerShell), build executable JAR with: `./mvnw clean package`.
 - Remember to pass the username as an `arg` of Main method as shown below.
 - If running inside an IDE, (eg. Eclipse or IntelliJ) you can set the username arg in: **Run Menu** > **Edit
   Configuration** >
